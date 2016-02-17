@@ -14,9 +14,9 @@ Warning: You probably have to set your cordova app to keep running by **keepRunn
 
 ## Description
 
-Cross-platform foreground and background geolocation for Cordova / PhoneGap with battery-saving "circular region monitoring" and "stop detection".
+Cross-platform background geolocation for Cordova / PhoneGap with battery-saving "circular region monitoring" and "stop detection".
 
-It is far more battery and data efficient then html5 geolocation or cordova-geolocation plugin. But you can still use it together with other geolocation providers (eg. html5 navigator.geolocation).
+Plugin is both foreground and background geolocation provider. It is far more battery and data efficient then html5 geolocation or cordova-geolocation plugin. But you can still use it together with other geolocation providers (eg. html5 navigator.geolocation).
 
 ## Installing the plugin
 
@@ -25,6 +25,7 @@ As Cordova is [shifting towards npm](http://cordova.apache.org/announcements/201
 ```
 cordova plugin add cordova-plugin-mauron85-background-geolocation
 ```
+
 ## Registering plugin for Adobe® PhoneGap™ Build
 
 There is separate project [cordova-plugin-mauron85-background-geolocation-phonegapbuild](https://github.com/mauron85/cordova-plugin-mauron85-background-geolocation-phonegapbuild) to support [Adobe® PhoneGap™ Build](http://build.phonegap.com).
@@ -38,6 +39,7 @@ To register plugin add following line into your config.xml:
 ```
 
 NOTE: If you're using *hydration*, you have to download and reinstall your app with every new version of the plugin, as plugins are not updated.
+
 
 ## Compilation
 
@@ -53,6 +55,7 @@ Android Support Repository | 25
 Android Support Library    | 23.1.1
 Google Play Services       | 29
 Google Repository          | 24
+
 
 ## Quick Example
 
@@ -98,6 +101,8 @@ function onDeviceReady () {
     // backgroundGeoLocation.stop();
 }
 ```
+
+NOTE: On some platforms is required to enable Cordova's GeoLocation in the foreground and have the user accept Location services by executing `watchPosition` or `getCurrentPosition`. Not needed on Android.
 
 ## Example Application
 
@@ -158,11 +163,14 @@ Parameter | Type | Platform     | Description
 `option.debug` | `Boolean` | all | When enabled, the plugin will emit sounds for life-cycle events of background-geolocation! See debugging sounds table.
 `option.distanceFilter` | `Number` | all | The minimum distance (measured in meters) a device must move horizontally before an update event is generated. **@see** [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/distanceFilter).
 `option.stopOnTerminate` | `Boolean` | iOS, Android | Enable this in order to force a stop() when the application terminated (e.g. on iOS, double-tap home button, swipe away the app).
-`option.locationTimeout` | `Number` | Android, WP8 | The minimum time interval between location updates in seconds. **@see** [Android docs](http://developer.android.com/reference/android/location/LocationManager.html#requestLocationUpdates(long,%20float,%20android.location.Criteria,%20android.app.PendingIntent)) and the [MS doc](http://msdn.microsoft.com/en-us/library/windows/apps/windows.devices.geolocation.geolocator.reportinterval) for more information.
+`option.startOnBoot` | `Boolean` | Android | Start tracking service on device boot.
+`option.startForeground` | `Boolean` | Android | If false location service will not be started in foreground and no notification will be shown.
+`option.interval` | `Number` | Android, WP8 | The minimum time interval between location updates in seconds. **@see** [Android docs](http://developer.android.com/reference/android/location/LocationManager.html#requestLocationUpdates(long,%20float,%20android.location.Criteria,%20android.app.PendingIntent)) and the [MS doc](http://msdn.microsoft.com/en-us/library/windows/apps/windows.devices.geolocation.geolocator.reportinterval) for more information.
 `option.notificationTitle` | `String` optional | Android | Custom notification title in the drawer.
 `option.notificationText` | `String` optional | Android | Custom notification text in the drawer.
 `option.notificationIconColor` | `String` optional| Android | The accent color to use for notification. Eg. **#4CAF50**.
-`option.notificationIcon` | `String` optional | Android | The filename of a custom notification icon. See android quirks. **NOTE:** Only available for API Level >=21.
+`option.notificationIconLarge` | `String` optional | Android | The filename of a custom notification icon. See android quirks.
+`option.notificationIconSmall` | `String` optional | Android | The filename of a custom notification icon. See android quirks.
 `option.locationService` | `Number` | Android | Set location service provider **@see** [wiki](https://github.com/mauron85/cordova-plugin-background-geolocation/wiki/Android-providers)
 `option.activityType` | `String` | iOS | [AutomotiveNavigation, OtherNavigation, Fitness, Other] Presumably, this affects iOS GPS algorithm. **@see** [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/activityType) for more information
 
@@ -272,7 +280,8 @@ backgroundGeoLocation.configure(callbackFn, failureFn, {
     notificationIconColor: '#4CAF50',
     notificationTitle: 'Background tracking',
     notificationText: 'ENABLED',
-    notificationIcon: 'notification_icon',
+    notificationIconLarge: 'icon_large', //filename without extension
+    notificationIconSmall: 'icon_small', //filename without extension
     debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
     stopOnTerminate: false, // <-- enable this to clear background location settings when the app terminates
     locationService: backgroundGeoLocation.service.ANDROID_FUSED_LOCATION,
@@ -328,7 +337,6 @@ If main activity is killed by the system and ```stopOnTerminate``` option is fal
 Plugin should work with custom ROMS at least ANDROID_DISTANCE_FILTER. But ANDROID_FUSED_LOCATION provider depends on Google Play Services.
 Usually ROMs don't include Google Play Services libraries. Strange bugs may occur, like no GPS locations (only from network and passive) and other. When posting issue report, please mention that you're using custom ROM.
 
-
 #### Multidex
 Note: Following section was kindly copied from [phonegap-plugin-push](https://github.com/phonegap/phonegap-plugin-push/blob/master/docs/INSTALLATION.md#multidex). Visit link for resolving issue with facebook plugin.
 
@@ -355,17 +363,13 @@ See [this for the reference on the cordova plugin specification](https://cordova
 
 Common plugins to suffer from this outdated dependency management are plugins related to *facebook*, *google+*, *notifications*, *crosswalk* and *google maps*.
 
-#### Android Permissions
-
-Android 6.0 "Marshmallow" introduced a new permissions model where the user can turn on and off permissions as necessary. When user disallow location access permissions, error configure callback will be called with error code: 20.
-
-
-#### `notificationIcon`
+#### Notification icons
 **NOTE:** Only available for API Level >=21.
 
-To use custom notification icon eg. **new_icon**, you need to put icons **new_icon_small.png** and **new_icon_large.png** into *res/drawable* directory **of your app**. You can automate the process  as part of **after_platform_add** hook configured via [config.xml](/example/SampleApp/config.xml). Check SampleApp [config.xml](/example/SampleApp/config.xml) and [scripts/resource_files.js](/example/SampleApp/scripts/resource_files.js) for reference.
+To use custom notification icons, you need to put icons into *res/drawable* directory **of your app**. You can automate the process  as part of **after_platform_add** hook configured via [config.xml](/example/SampleApp/config.xml). Check SampleApp [config.xml](/example/SampleApp/config.xml) and [scripts/resource_files.js](/example/SampleApp/scripts/resource_files.js) for reference.
 
-With Adobe® PhoneGap™ Build icons must be placed into ```locales/android/drawable``` dir at the root of your project. For more information go to [how-to-add-native-image-with-phonegap-build](http://stackoverflow.com/questions/30802589/how-to-add-native-image-with-phonegap-build/33221780#33221780).
+NOTE: Using custom icons is currently not possible with Adobe® PhoneGap™ Build, as there is no way how to copy icons into *res/drawable*.
+The workaround for payed plans is to create private res only plugin using [secondary-icon](https://github.com/kentmw/secondary-icon).
 
 ### Intel XDK
 

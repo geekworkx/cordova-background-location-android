@@ -1,25 +1,18 @@
 ## Changelog
 
-### [0.9.4] - 2016-01-31
-#### Fixed
-- Android 6.0 permissions issue #21
+### [1.0.0] - unreleased
+#### Changed
+- Android notificationIcon option split into small and large!!!
+- Android stopOnTerminate defaults to true
+- Android bugfixing
 
-### [0.9.3] - 2016-01-29
-#### Fixed
-- iOS cordova 6 compilation error
-- iOS fix for iOS 9
+#### Added
+- Android startOnBoot option
+- Android startForeground option
 
-#### Changes
-- iOS removing cordova-plugin-geolocation dependency
-- iOS user prompt for using location services
-- iOS error callback when location services are disabled
-- iOS error callback when user denied location tracking
-- iOS adding error callbacks to SampleApp
-
-### [0.9.2] - 2016-01-29
-#### Fixed
-- iOS temporarily using cordova-plugin-geolocation-ios9-fix to fix issues with iOS9
-- iOS fixing SampleApp indexedDB issues
+#### Removed
+- Android deprecated window.plugins.backgroundGeoLocation
+- Android locationTimeout option (use interval instead)
 
 ### [0.9.1] - 2015-12-18
 #### Fixed

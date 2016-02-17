@@ -10,7 +10,6 @@ This is a new class
 package com.tenforwardconsulting.cordova.bgloc;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.AlarmManager;
 import android.support.v4.app.NotificationCompat;
@@ -20,12 +19,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.IBinder;
@@ -35,22 +33,20 @@ import android.widget.Toast;
 
 import com.marianhello.cordova.bgloc.Config;
 import com.marianhello.cordova.bgloc.Constant;
-import com.marianhello.cordova.bgloc.ServiceProvider;
+import com.marianhello.cordova.bgloc.ServiceProviderFactory;
 import com.tenforwardconsulting.cordova.bgloc.data.LocationProxy;
 import com.tenforwardconsulting.cordova.bgloc.data.LocationDAO;
 import com.tenforwardconsulting.cordova.bgloc.data.DAOFactory;
 
 import java.util.Random;
-import org.json.JSONException;
 
-public abstract class AbstractLocationService extends Service {
-    private static final String TAG = "AbstractLocationService";
 
-    protected Config config;
+public class LocationService extends Service {
+    private static final String TAG = "LocationService";
+
+    private Config config;
     private Boolean isActionReceiverRegistered = false;
-
-    protected Location lastLocation;
-    protected ToneGenerator toneGenerator;
+    private ServiceProvider provider;
 
     private BroadcastReceiver actionReceiver = new BroadcastReceiver() {
         @Override
@@ -79,8 +75,6 @@ public abstract class AbstractLocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
-
         // Receiver for actions
         registerActionReceiver();
     }
@@ -88,18 +82,29 @@ public abstract class AbstractLocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Received start id " + startId + ": " + intent);
-        if (intent != null) {
-            // config = Config.fromByteArray(intent.getByteArrayExtra("config"));
-            config = (Config) intent.getParcelableExtra("config");
-            Log.i(TAG, "Config: " + config.toString());
 
+        // config = Config.fromByteArray(intent.getByteArrayExtra("config"));
+        if (intent.hasExtra("config")) {
+            config = (Config) intent.getParcelableExtra("config");
+        } else {
+            config = new Config();
+        }
+
+        ServiceProviderFactory spf = new ServiceProviderFactory(this, config);
+        provider = spf.getInstance(config.getServiceProvider());
+        provider.onCreate();
+
+        if (config.getStartForeground()) {
             // Build a Notification required for running service in foreground.
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
             builder.setContentTitle(config.getNotificationTitle());
             builder.setContentText(config.getNotificationText());
-            builder.setSmallIcon(android.R.drawable.ic_menu_mylocation);
-            if (config.getNotificationIcon() != null) {
+            if (config.getSmallNotificationIcon() != null) {
                 builder.setSmallIcon(getPluginResource(config.getSmallNotificationIcon()));
+            } else {
+                builder.setSmallIcon(android.R.drawable.ic_menu_mylocation);
+            }
+            if (config.getLargeNotificationIcon() != null) {
                 builder.setLargeIcon(BitmapFactory.decodeResource(getApplication().getResources(), getPluginResource(config.getLargeNotificationIcon())));
             }
             if (config.getNotificationIconColor() != null) {
@@ -113,11 +118,13 @@ public abstract class AbstractLocationService extends Service {
             startForeground(startId, notification);
         }
 
+        provider.startRecording();
+
         //We want this service to continue running until it is explicitly stopped
         return START_REDELIVER_INTENT;
     }
 
-    public Integer getPluginResource(String resourceName) {
+    protected Integer getPluginResource(String resourceName) {
         return getApplication().getResources().getIdentifier(resourceName, "drawable", getApplication().getPackageName());
     }
 
@@ -147,76 +154,6 @@ public abstract class AbstractLocationService extends Service {
         return iconColor;
     }
 
-    /**
-     * Plays debug sound
-     * @param name
-     */
-    protected void startTone(String name) {
-        int tone = 0;
-        int duration = 1000;
-
-        if (name.equals("beep")) {
-            tone = ToneGenerator.TONE_PROP_BEEP;
-        } else if (name.equals("beep_beep_beep")) {
-            tone = ToneGenerator.TONE_CDMA_CONFIRM;
-        } else if (name.equals("long_beep")) {
-            tone = ToneGenerator.TONE_CDMA_ABBR_ALERT;
-        } else if (name.equals("doodly_doo")) {
-            tone = ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE;
-        } else if (name.equals("chirp_chirp_chirp")) {
-            tone = ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD;
-        } else if (name.equals("dialtone")) {
-            tone = ToneGenerator.TONE_SUP_RINGTONE;
-        }
-        toneGenerator.startTone(tone, duration);
-    }
-
-    protected void persistLocation (LocationProxy location) {
-        LocationDAO dao = DAOFactory.createLocationDAO(this.getApplicationContext());
-
-        if (dao.persistLocation(location)) {
-            Log.d(TAG, "Persisted Location: " + location);
-        } else {
-            Log.w(TAG, "Failed to persist location");
-        }
-    }
-
-    protected void handleLocation (Location location) {
-        final LocationProxy bgLocation = LocationProxy.fromAndroidLocation(location);
-        bgLocation.setServiceProvider(config.getServiceProvider());
-
-        if (config.isDebugging()) {
-            bgLocation.setDebug(true);
-            persistLocation(bgLocation);
-        }
-
-        Log.d(TAG, "Broadcasting update message: " + bgLocation.toString());
-        try {
-            String locStr = bgLocation.toJSONObject().toString();
-            Intent intent = new Intent(Constant.ACTION_FILTER);
-            intent.putExtra(Constant.ACTION, Constant.ACTION_LOCATION_UPDATE);
-            intent.putExtra(Constant.DATA, locStr);
-            this.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
-                // @SuppressLint("NewApi")
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    Log.d(TAG, "Final Result Receiver");
-                    Bundle results = getResultExtras(true);
-                    if (results.getString(Constant.LOCATION_SENT_INDICATOR) == null) {
-                        Log.w(TAG, "Main activity seems to be killed");
-                        if (config.getStopOnTerminate() == false) {
-                            bgLocation.setDebug(false);
-                            persistLocation(bgLocation);
-                            Log.d(TAG, "Persisting location. Reason: Main activity was killed.");
-                        }
-                    }
-              }
-            }, null, Activity.RESULT_OK, null, null);
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to broadcast location");
-        }
-    }
-
     public Intent registerActionReceiver () {
         if (isActionReceiverRegistered) { return null; }
 
@@ -231,44 +168,38 @@ public abstract class AbstractLocationService extends Service {
         isActionReceiverRegistered = false;
     }
 
-    public void startDelayed () {
-        Class serviceProviderClass = null;
-        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-
-        try {
-            Intent serviceIntent = new Intent(this, ServiceProvider.getClass(config.getServiceProvider()));
-            serviceIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
-            serviceIntent.putExtra("config", config.toParcel().marshall());
-            PendingIntent pintent = PendingIntent.getService(this, 0, serviceIntent, 0);
-            alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 5 * 1000, pintent);
-        } catch (ClassNotFoundException e) {
-            Log.e(TAG, "Service restart failed");
-        }
+    public void startRecording() {
+        provider.startRecording();
     }
 
-    protected abstract void cleanUp();
-
-    protected abstract void startRecording();
-
-    protected abstract void stopRecording();
-
+    public void stopRecording() {
+        provider.stopRecording();
+    }
 
     @Override
     public boolean stopService(Intent intent) {
-        Log.i(TAG, "- Received stop: " + intent);
-        cleanUp();
+        Log.i(TAG, "Stopping service: " + intent);
+        provider.stopRecording();
         if (config.isDebugging()) {
-            Toast.makeText(this, "Background location tracking stopped", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Stopping Location service", Toast.LENGTH_SHORT).show();
         }
         return super.stopService(intent); // not needed???
     }
 
+    /**
+     * Forces the main activity to re-launch if it's unloaded.
+     */
+    private void forceMainActivityReload() {
+        PackageManager pm = getPackageManager();
+        Intent launchIntent = pm.getLaunchIntentForPackage(getApplicationContext().getPackageName());
+        startActivity(launchIntent);
+    }
+
     @Override
     public void onDestroy() {
-        Log.w(TAG, "Destroyed Location update Service");
-        toneGenerator.release();
+        Log.w(TAG, "Destroying Location Service");
         unregisterActionReceiver();
-        cleanUp();
+        provider.onDestroy();
         stopForeground(true);
         super.onDestroy();
     }
