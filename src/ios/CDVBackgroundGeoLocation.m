@@ -144,18 +144,24 @@
  */
 - (void) configure:(CDVInvokedUrlCommand*)command
 {
-    // Params.
-    //    0                    1               2                 3           4          5                  6                7               8
-    //[stationaryRadius, distanceFilter, locationTimeout, desiredAccuracy, debug, notificationTitle, notificationText, activityType, stopOnTerminate]
-
-    // UNUSED ANDROID VARS
-    stationaryRadius    = [[command.arguments objectAtIndex: 0] intValue];
-    distanceFilter      = [[command.arguments objectAtIndex: 1] intValue];
-    locationTimeout     = [[command.arguments objectAtIndex: 2] intValue];
-    desiredAccuracy     = [self decodeDesiredAccuracy:[[command.arguments objectAtIndex: 3] intValue]];
-    isDebugging         = [[command.arguments objectAtIndex: 4] boolValue];
-    activityType        = [self decodeActivityType:[command.arguments objectAtIndex:7]];
-    stopOnTerminate     = [[command.arguments objectAtIndex: 8] boolValue];
+    NSDictionary *config = [command.arguments objectAtIndex:0];
+    
+    if (config[@"desiredAccuracy"]) {
+        desiredAccuracy = [self decodeDesiredAccuracy:[config[@"desiredAccuracy"] floatValue]];
+        NSLog(@"    desiredAccuracy: %@", config[@"desiredAccuracy"]);
+    }
+    if (config[@"stationaryRadius"]) {
+        stationaryRadius = [config[@"stationaryRadius"] intValue];
+        NSLog(@"    stationaryRadius: %@", config[@"stationaryRadius"]);
+    }
+    if (config[@"distanceFilter"]) {
+        distanceFilter = [config[@"distanceFilter"] intValue];
+        NSLog(@"    distanceFilter: %@", config[@"distanceFilter"]);
+    }
+    if (config[@"locationTimeout"]) {
+        locationTimeout = [config[@"locationTimeout"] intValue];
+        NSLog(@"    locationTimeout: %@", config[@"locationTimeout"]);
+    }
 
     self.syncCallbackId = command.callbackId;
 
