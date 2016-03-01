@@ -54,6 +54,13 @@
                   <action android:name="android.intent.action.BOOT_COMPLETED" />
                </intent-filter>
             </receiver>
+            <receiver 
+                android:enabled="true" 
+                android:exported="true" android:name="com.tenforwardconsulting.cordova.bgloc.LocationUploader">
+            <intent-filter>
+                <action android:name="com.tenforwardconsulting.cordova.bgloc.cordova.bgloc.ACTION"/>
+            </intent-filter>
+        </receiver>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
@@ -73,5 +80,6 @@
         </config-file>
         <framework src="com.google.android.gms:play-services-location:8.4.0" />
         <framework src="com.android.support:support-v4:+" />
+        <framework src="com.squareup.okhttp3:okhttp:3.2.0" />
     </platform>
 </plugin>
