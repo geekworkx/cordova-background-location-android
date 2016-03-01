@@ -1,18 +1,16 @@
 {
-  "name": "cordova-plugin-mauron85-background-geolocation",
+  "name": "cordova-background-location-android",
   "version": "1.0.0-alpha.1",
   "description": "Cordova Background GeoLocation Plugin",
   "cordova": {
-    "id": "cordova-plugin-mauron85-background-geolocation",
+    "id": "cordova-background-location-android",
     "platforms": [
-      "android",
-      "ios",
-      "wp8"
+      "android"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mauron85/cordova-plugin-background-geolocation.git"
+    "url": "git+https://github.com/jumpbytehq/cordova-background-location-android.git"
   },
   "keywords": [
     "gps",
@@ -34,7 +32,7 @@
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/mauron85/cordova-plugin-background-geolocation/issues"
+    "url": "https://github.com/jumpbytehq/cordova-background-location-android/issues"
   },
-  "homepage": "https://github.com/mauron85/cordova-plugin-background-geolocation#readme"
+  "homepage": "https://github.com/jumpbytehq/cordova-background-location-android#readme"
 }
