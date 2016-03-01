@@ -1,4 +1,4 @@
-# cordova-plugin-mauron85-background-geolocation
+# cordova-background-location-android
 
 ## Fork notice
 
