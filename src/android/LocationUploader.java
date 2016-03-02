@@ -47,6 +47,10 @@ public class LocationUploader extends BroadcastReceiver{
                 Log.d(TAG, "Sending location update to server " + data.toString());
                 String jsonString = data.getString(Constant.DATA);
                 String url = data.getString("url");
+                if(url == null){
+                    return;
+                }
+
                 String method = data.getString("method");
                 HashMap<String, String> headers = (HashMap<String, String>) data.getSerializable("headers");
                 HashMap<String, String> params = (HashMap<String, String>) data.getSerializable("params");

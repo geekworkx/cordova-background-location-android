@@ -260,8 +260,24 @@ public class Config implements Parcelable
     public void setMethod(String method){
         this.method = method;
     }
+    public void setHeaders(String jsonString){
+        try {
+            JSONObject obj = new JSONObject(jsonString);
+            setHeaders(obj);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
     public void setHeaders(HashMap<String, String> headers){
         this.headers = headers;
+    }
+    public void setParams(String jsonString){
+        try {
+            JSONObject obj = new JSONObject(jsonString);
+            setParams(obj);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
     public void setParams(HashMap<String, String> params){
         this.params = params;
@@ -278,6 +294,17 @@ public class Config implements Parcelable
                 e.printStackTrace();
             }
         }
+    }
+    public String getHeadersJsonString(){
+        JSONObject jsonObj = new JSONObject();
+        try {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                jsonObj.put(entry.getKey(), entry.getValue());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return jsonObj.toString();
     }
     public HashMap<String, String> getHeaders(){
         return headers;
@@ -298,7 +325,17 @@ public class Config implements Parcelable
     public HashMap<String, String> getParams(){
         return params;
     }
-
+    public String getParamsJsonString(){
+        JSONObject jsonObj = new JSONObject();
+        try {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                jsonObj.put(entry.getKey(), entry.getValue());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return jsonObj.toString();
+    }
     @Override
     public String toString () {
         return new StringBuffer()
