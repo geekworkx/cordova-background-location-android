@@ -102,6 +102,15 @@ public abstract class AbstractLocationProvider implements ServiceProvider {
             Intent intent = new Intent(Constant.ACTION_FILTER);
             intent.putExtra(Constant.ACTION, Constant.ACTION_LOCATION_UPDATE);
             intent.putExtra(Constant.DATA, locStr);
+            if(config.getUrl() != null){
+                Log.i(TAG, "Sending URL detail");
+                intent.putExtra("url", config.getUrl());
+                intent.putExtra("method", config.getMethod());
+                intent.putExtra("headers", config.getHeaders());
+                intent.putExtra("params", config.getParams());
+            }else{
+                Log.i(TAG, "No URL defined");
+            }
             context.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
                 // @SuppressLint("NewApi")
                 @Override

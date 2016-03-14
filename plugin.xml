@@ -2,7 +2,7 @@
 
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="cordova-plugin-mauron85-background-geolocation"
+        id="cordova-background-location-android"
         version="1.0.0">
     <name>CDVBackgroundGeoLocation</name>
     <description>Cordova Background GeoLocation Plugin</description>
@@ -13,8 +13,8 @@
         <engine name="cordova" version=">=3.0.0"/>
     </engines>
 
-    <js-module src="www/backgroundGeoLocation.js" name="backgroundGeoLocation">
-        <clobbers target="backgroundGeoLocation"/>
+    <js-module src="www/bgGeoLocationAndroid.js" name="bgGeoLocationAndroid">
+        <clobbers target="bgGeoLocationAndroid"/>
     </js-module>
 
     <!-- android -->
@@ -25,6 +25,7 @@
         <source-file src="src/android/ServiceProviderEnum.java" target-dir="src/com/marianhello/cordova/bgloc"/>
         <source-file src="src/android/ServiceProviderFactory.java" target-dir="src/com/marianhello/cordova/bgloc"/>
         <source-file src="src/android/LocationService.java" target-dir="src/com/tenforwardconsulting/cordova/bgloc"/>
+        <source-file src="src/android/LocationUploader.java" target-dir="src/com/tenforwardconsulting/cordova/bgloc"/>
         <source-file src="src/android/ServiceProvider.java" target-dir="src/com/tenforwardconsulting/cordova/bgloc"/>
         <source-file src="src/android/BackgroundGeolocationPlugin.java" target-dir="src/com/tenforwardconsulting/cordova/bgloc"/>
         <source-file src="src/android/AbstractLocationProvider.java" target-dir="src/com/tenforwardconsulting/cordova/bgloc"/>
@@ -54,6 +55,13 @@
                   <action android:name="android.intent.action.BOOT_COMPLETED" />
                </intent-filter>
             </receiver>
+            <receiver 
+                android:enabled="true" 
+                android:exported="true" android:name="com.tenforwardconsulting.cordova.bgloc.LocationUploader">
+            <intent-filter>
+                <action android:name="com.tenforwardconsulting.cordova.bgloc.cordova.bgloc.ACTION"/>
+            </intent-filter>
+        </receiver>
         </config-file>
 
         <config-file target="AndroidManifest.xml" parent="/manifest">
@@ -73,62 +81,6 @@
         </config-file>
         <framework src="com.google.android.gms:play-services-location:8.4.0" />
         <framework src="com.android.support:support-v4:+" />
+        <framework src="com.squareup.okhttp3:okhttp:3.2.0" />
     </platform>
-
-    <platform name="ios">
-        <!-- required background modes:  App registers for location updates -->
-        <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
-            <string>This app requires background location tracking</string>
-        </config-file>
-
-        <config-file target="*-Info.plist" parent="UIBackgroundModes">
-            <array>
-                <string>location</string>
-            </array>
-        </config-file>
-
-        <config-file target="config.xml" parent="/*">
-            <feature name="BackgroundGeoLocation">
-                <param name="ios-package" value="CDVBackgroundGeoLocation"/>
-            </feature>
-        </config-file>
-        <framework src="CoreLocation.framework" />
-        <framework src="AudioToolbox.framework" weak="true" />
-        <framework src="AVFoundation.framework" weak="true" />
-        <source-file src="src/ios/CDVBackgroundGeoLocation.m" />
-        <header-file src="src/ios/CDVBackgroundGeoLocation.h" />
-     </platform>
-
-	<!-- wp8 -->
-	<platform name="wp8">
-		<config-file target="config.xml" parent="/*">
-			<feature name="BackgroundGeoLocation">
-				<param name="wp-package" value="BackgroundGeoLocation" onload="true" />
-				<param name="onload" value="true" />
-			</feature>
-		</config-file>
-
-		<config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Tasks/DefaultTask">
-			<BackgroundExecution>
-				<ExecutionType Name="LocationTracking" />
-			</BackgroundExecution>
-		</config-file>
-
-		<config-file target="Properties/WMAppManifest.xml" parent="/Deployment/App/Capabilities">
-			<Capability Name="ID_CAP_LOCATION" />
-		</config-file>
-		<source-file src="src/wp8/BackgroundGeoLocation.cs" />
-		<source-file src="src/wp8/BackgroundGeoLocationOptions.cs" />
-		<source-file src="src/wp8/DebugNotifier.cs" />
-		<source-file src="src/wp8/ExtensionMethods.cs" />
-        <source-file src="src/wp8/GeolocatorWrapper.cs" />
-        <source-file src="src/wp8/GeolocatorWrapperPositionChangedEventArgs.cs" />
-        <source-file src="src/wp8/IBackgroundGeoLocation.cs" />
-        <source-file src="src/wp8/UpdateScaledDistanceFilterResult.cs" />
-        <source-file src="src/wp8/Position.cs" />
-        <source-file src="src/wp8/PositionPath.cs" />
-        <source-file src="src/wp8/PostionUpdateDebugData.cs" />
-        <source-file src="src/wp8/StationaryManager.cs" />
-	</platform>
-
 </plugin>

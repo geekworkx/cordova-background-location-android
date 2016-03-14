@@ -18,6 +18,10 @@ import android.os.Parcelable;
 import org.json.JSONObject;
 import org.json.JSONException;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Config class
  */
@@ -39,6 +43,10 @@ public class Config implements Parcelable
     private Boolean stopOnTerminate = false;
     private Boolean startOnBoot = false;
     private Boolean startForeground = true;
+    private String url = null;
+    private String method = null;
+    private HashMap<String, String> headers = null;
+    private HashMap<String, String> params = null;
 
     public int describeContents() {
         return 0;
@@ -62,6 +70,10 @@ public class Config implements Parcelable
         out.writeInt(getInterval());
         out.writeInt(getFastestInterval());
         out.writeInt(getActivitiesInterval());
+        out.writeString(getUrl());
+        out.writeString(getMethod());
+        out.writeSerializable(getHeaders());
+        out.writeSerializable(getParams());
     }
 
     public static final Parcelable.Creator<Config> CREATOR
@@ -96,6 +108,10 @@ public class Config implements Parcelable
         setInterval(in.readInt());
         setFastestInterval(in.readInt());
         setActivitiesInterval(in.readInt());
+        setUrl(in.readString());
+        setMethod(in.readString());
+        setHeaders((HashMap<String, String>) in.readSerializable());
+        setParams((HashMap<String, String>)in.readSerializable());
     }
 
     public float getStationaryRadius() {
@@ -232,11 +248,99 @@ public class Config implements Parcelable
         this.activitiesInterval = activitiesInterval;
     }
 
+    public String getUrl(){
+        return url;
+    }
+    public String getMethod(){
+        return method;
+    }
+    public void setUrl(String url){
+        this.url = url;
+    }
+    public void setMethod(String method){
+        this.method = method;
+    }
+    public void setHeaders(String jsonString){
+        try {
+            JSONObject obj = new JSONObject(jsonString);
+            setHeaders(obj);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void setHeaders(HashMap<String, String> headers){
+        this.headers = headers;
+    }
+    public void setParams(String jsonString){
+        try {
+            JSONObject obj = new JSONObject(jsonString);
+            setParams(obj);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void setParams(HashMap<String, String> params){
+        this.params = params;
+    }
+    public void setHeaders(JSONObject headersObj){
+        Iterator<String> iterator = headersObj.keys();
+        headers = new HashMap<String, String>();
+        while(iterator.hasNext()){
+            try {
+                String key = iterator.next();
+                String val = headersObj.getString(key);
+                headers.put(key, val);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+    public String getHeadersJsonString(){
+        JSONObject jsonObj = new JSONObject();
+        try {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                jsonObj.put(entry.getKey(), entry.getValue());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return jsonObj.toString();
+    }
+    public HashMap<String, String> getHeaders(){
+        return headers;
+    }
+    public void setParams(JSONObject headersObj){
+        Iterator<String> iterator = headersObj.keys();
+        params = new HashMap<String, String>();
+        while(iterator.hasNext()){
+            try {
+                String key = iterator.next();
+                String val = headersObj.getString(key);
+                params.put(key, val);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+    public HashMap<String, String> getParams(){
+        return params;
+    }
+    public String getParamsJsonString(){
+        JSONObject jsonObj = new JSONObject();
+        try {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                jsonObj.put(entry.getKey(), entry.getValue());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return jsonObj.toString();
+    }
     @Override
     public String toString () {
         return new StringBuffer()
                 .append("stationaryRadius: "       + getStationaryRadius())
-                .append(" desiredAccuracy: "       + getDesiredAccuracy())
+                .append(" desiredAccuracy: " + getDesiredAccuracy())
                 .append(" distanceFilter: "        + getDistanceFilter())
                 .append(" debugging: "             + isDebugging())
                 .append(" notificationTitle: "     + getNotificationTitle())
@@ -251,6 +355,10 @@ public class Config implements Parcelable
                 .append(" interval: "              + getInterval())
                 .append(" fastestInterval: "       + getFastestInterval())
                 .append(" activitiesInterval: "    + getActivitiesInterval())
+                .append(" url: " + getUrl())
+                .append(" method: " + getMethod())
+                .append(" headers: " + getHeaders())
+                .append(" params: " + getParams())
                 .toString();
     }
 
@@ -287,7 +395,10 @@ public class Config implements Parcelable
         config.setLargeNotificationIcon(jObject.optString("notificationIconLarge", config.getLargeNotificationIcon()));
         config.setSmallNotificationIcon(jObject.optString("notificationIconSmall", config.getSmallNotificationIcon()));
         config.setStartForeground(jObject.optBoolean("startForeground", config.getStartForeground()));
-
+        config.setUrl(jObject.optString("url", config.getUrl()));
+        config.setMethod(jObject.optString("method", config.getMethod()));
+        config.setHeaders(jObject.optJSONObject("headers"));
+        config.setParams(jObject.optJSONObject("params"));
         return config;
     }
 
@@ -309,7 +420,10 @@ public class Config implements Parcelable
         json.put("interval", getInterval());
         json.put("fastestInterval", getFastestInterval());
         json.put("activitiesInterval", getActivitiesInterval());
-
+        json.put("url", getUrl());
+        json.put("method", getMethod());
+        json.put("headers", getHeaders());
+        json.put("params", getParams());
         return json;
   	}
 }

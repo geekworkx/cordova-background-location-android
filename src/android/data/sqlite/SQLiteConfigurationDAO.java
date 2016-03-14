@@ -48,7 +48,11 @@ public class SQLiteConfigurationDAO implements ConfigurationDAO {
       ConfigurationEntry.COLUMN_NAME_SERVICE_PROVIDER,
       ConfigurationEntry.COLUMN_NAME_INTERVAL,
       ConfigurationEntry.COLUMN_NAME_FASTEST_INTERVAL,
-      ConfigurationEntry.COLUMN_NAME_ACTIVITIES_INTERVAL
+      ConfigurationEntry.COLUMN_NAME_ACTIVITIES_INTERVAL,
+      ConfigurationEntry.COLUMN_NAME_URL,
+      ConfigurationEntry.COLUMN_NAME_METHOD,
+      ConfigurationEntry.COLUMN_NAME_HEADERS,
+      ConfigurationEntry.COLUMN_NAME_PARAMS
     };
 
     String whereClause = null;
@@ -104,19 +108,24 @@ public class SQLiteConfigurationDAO implements ConfigurationDAO {
     config.setStationaryRadius(c.getFloat(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_RADIUS)));
     config.setDistanceFilter(c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_DISTANCE_FILTER)));
     config.setDesiredAccuracy(c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_DESIRED_ACCURACY)));
-    config.setDebugging( (c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_DEBUGGING)) == 1) ? true : false );
+    config.setDebugging((c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_DEBUGGING)) == 1) ? true : false);
     config.setNotificationTitle(c.getString(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_NOTIF_TITLE)));
     config.setNotificationText(c.getString(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_NOTIF_TEXT)));
     config.setSmallNotificationIcon(c.getString(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_NOTIF_ICON_SMALL)));
     config.setLargeNotificationIcon(c.getString(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_NOTIF_ICON_LARGE)));
     config.setNotificationIconColor(c.getString(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_NOTIF_COLOR)));
-    config.setStopOnTerminate( (c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_STOP_TERMINATE)) == 1) ? true : false );
-    config.setStartOnBoot( (c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_START_BOOT)) == 1) ? true : false );
-    config.setStartForeground( (c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_START_FOREGROUND)) == 1) ? true : false );
+    config.setStopOnTerminate((c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_STOP_TERMINATE)) == 1) ? true : false);
+    config.setStartOnBoot((c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_START_BOOT)) == 1) ? true : false);
+    config.setStartForeground((c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_START_FOREGROUND)) == 1) ? true : false);
     config.setServiceProvider(c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_SERVICE_PROVIDER)));
     config.setInterval(c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_INTERVAL)));
     config.setFastestInterval(c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_FASTEST_INTERVAL)));
     config.setActivitiesInterval(c.getInt(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_ACTIVITIES_INTERVAL)));
+
+    config.setUrl(c.getString(c.getColumnIndex(ConfigurationEntry.COLUMN_NAME_URL)));
+    config.setMethod( c.getString( c.getColumnIndex( ConfigurationEntry.COLUMN_NAME_METHOD)));
+    config.setHeaders( c.getString( c.getColumnIndex( ConfigurationEntry.COLUMN_NAME_HEADERS)));
+    config.setParams( c.getString( c.getColumnIndex( ConfigurationEntry.COLUMN_NAME_PARAMS)));
 
     return config;
   }
@@ -139,6 +148,10 @@ public class SQLiteConfigurationDAO implements ConfigurationDAO {
     values.put(ConfigurationEntry.COLUMN_NAME_INTERVAL, config.getInterval());
     values.put(ConfigurationEntry.COLUMN_NAME_FASTEST_INTERVAL, config.getFastestInterval());
     values.put(ConfigurationEntry.COLUMN_NAME_ACTIVITIES_INTERVAL, config.getActivitiesInterval());
+    values.put(ConfigurationEntry.COLUMN_NAME_URL, config.getUrl());
+    values.put(ConfigurationEntry.COLUMN_NAME_METHOD, config.getMethod());
+    values.put(ConfigurationEntry.COLUMN_NAME_HEADERS, config.getHeadersJsonString());
+    values.put(ConfigurationEntry.COLUMN_NAME_PARAMS, config.getParamsJsonString());
 
     return values;
   }

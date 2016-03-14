@@ -49,7 +49,11 @@ public class SQLiteOpenHelper extends android.database.sqlite.SQLiteOpenHelper {
         ConfigurationEntry.COLUMN_NAME_SERVICE_PROVIDER + INTEGER_TYPE + COMMA_SEP +
         ConfigurationEntry.COLUMN_NAME_INTERVAL + INTEGER_TYPE + COMMA_SEP +
         ConfigurationEntry.COLUMN_NAME_FASTEST_INTERVAL + INTEGER_TYPE + COMMA_SEP +
-        ConfigurationEntry.COLUMN_NAME_ACTIVITIES_INTERVAL + INTEGER_TYPE +
+        ConfigurationEntry.COLUMN_NAME_ACTIVITIES_INTERVAL + INTEGER_TYPE + COMMA_SEP +
+        ConfigurationEntry.COLUMN_NAME_URL + TEXT_TYPE + COMMA_SEP +
+        ConfigurationEntry.COLUMN_NAME_METHOD + TEXT_TYPE + COMMA_SEP +
+        ConfigurationEntry.COLUMN_NAME_HEADERS + TEXT_TYPE + COMMA_SEP +
+        ConfigurationEntry.COLUMN_NAME_PARAMS + TEXT_TYPE +
         " )";
 
     private static final String SQL_DELETE_CONFIG_TABLE =
