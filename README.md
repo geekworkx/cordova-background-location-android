@@ -1,16 +1,8 @@
 # cordova-plugin-mauron85-background-geolocation
 
-## Fork notice
+## Changes in this Fork
 
-This is fork of [christocracy cordova-background-geolocation](https://github.com/christocracy/cordova-plugin-background-geolocation). The main change is in Android version. Posting positions to url was replaced by callbacks, so now it works same as in iOS. Plugin is now battery and data efficient **foreground** and background geolocation provider.
-
-On Android you can choose from two location service providers:
-* ANDROID_DISTANCE_FILTER (original christocracy's)
-* ANDROID_FUSED_LOCATION (experimental contributed by [huttj](https://github.com/huttj/cordova-plugin-background-geolocation))
-
-See wiki [Which provider should I use?](https://github.com/mauron85/cordova-plugin-background-geolocation/wiki/Android-providers) for more information about providers.
-
-Warning: You probably have to set your cordova app to keep running by **keepRunning** property to true (this is the default now).
+I have made changes in the Android port to enable the URL based location post even if application is not running. The credit still goes to the original author of the plugin.
 
 ## Description
 
@@ -23,23 +15,8 @@ Plugin is both foreground and background geolocation provider. It is far more ba
 As Cordova is [shifting towards npm](http://cordova.apache.org/announcements/2015/04/21/plugins-release-and-move-to-npm.html), this plugin can be installed from npm:
 
 ```
-cordova plugin add cordova-plugin-mauron85-background-geolocation
+cordova plugin add https://github.com/jumpbytehq/cordova-background-location-android
 ```
-
-## Registering plugin for Adobe® PhoneGap™ Build
-
-There is separate project [cordova-plugin-mauron85-background-geolocation-phonegapbuild](https://github.com/mauron85/cordova-plugin-mauron85-background-geolocation-phonegapbuild) to support [Adobe® PhoneGap™ Build](http://build.phonegap.com).
-
-The reason is that PhoneGap™ Build doesn't support ```<framework src="com.google.android.gms:play-services-location:+" />``` config option, so instead [cordova-plugin-googleplayservices](https://github.com/floatinghotpot/google-play-services) is used as dependency.
-
-To register plugin add following line into your config.xml:
-
-```
-<gap:plugin name="cordova-plugin-mauron85-background-geolocation-phonegapbuild" source="npm"/>
-```
-
-NOTE: If you're using *hydration*, you have to download and reinstall your app with every new version of the plugin, as plugins are not updated.
-
 
 ## Compilation
 
@@ -88,14 +65,41 @@ function onDeviceReady () {
     // BackgroundGeoLocation is highly configurable. See platform specific configuration options
     backgroundGeoLocation.configure(callbackFn, failureFn, {
         desiredAccuracy: 10,
-        stationaryRadius: 20,
-        distanceFilter: 30,
+        stationaryRadius: 10,
+        distanceFilter: 15,
         debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
         stopOnTerminate: false, // <-- enable this to clear background location settings when the app terminates
+        locationService: bgGeo.service.ANDROID_FUSED_LOCATION,
+        interval: 3000,
+        fastestInterval: 2500,
+        notificationTitle: "LOCATIONTEST", // Android
+        notificationText: "Background location tracking is ON.", // Android
+        notificationIconLarge: "icon", // Android
+        notificationIconSmall: "icon", // Android
+        startOnBoot: true,
+        startForeground: false,
+        
+        batchSync: true,       // <-- [Default: false] Set true to sync locations to server in a single HTTP request.
+        autoSync: true,         // <-- [Default: true] Set true to sync each location to server as it arrives.
+        maxDaysToPersist: 1,    // <-- Maximum days to persist a location in plugin's SQLite database when HTTP fails
+
+        url: 'http://posttestserver.com/post.php?dir=jumpbyte-background-test',            
+        method: 'POST',
+        headers: {
+            "X-FOO": "bar"
+        },
+        params: {
+            "auth_token": "maybe_your_server_authenticates_via_token_YES?"
+        }
     });
 
     // Turn ON the background-geolocation system.  The user will be tracked whenever they suspend the app.
     backgroundGeoLocation.start();
+
+    // This is required for Android
+    window.navigator.geolocation.getCurrentPosition(function(location) {
+        console.log('Location from Cordova');             
+    });
 
     // If you wish to turn OFF background-tracking, call the #stop method.
     // backgroundGeoLocation.stop();
