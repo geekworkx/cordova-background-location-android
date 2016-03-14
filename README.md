@@ -69,7 +69,7 @@ function onDeviceReady () {
         distanceFilter: 15,
         debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
         stopOnTerminate: false, // <-- enable this to clear background location settings when the app terminates
-        locationService: bgGeo.service.ANDROID_FUSED_LOCATION,
+        locationService: backgroundGeoLocation.service.ANDROID_FUSED_LOCATION,
         interval: 3000,
         fastestInterval: 2500,
         notificationTitle: "LOCATIONTEST", // Android
