@@ -41,6 +41,8 @@ document.addEventListener('deviceready', onDeviceReady, false);
 
 function onDeviceReady () {
 
+    var backgroundGeoLocation = window.bgGeoLocationAndroid;
+
     /**
     * This callback will be executed every time a geolocation is recorded in the background.
     */
