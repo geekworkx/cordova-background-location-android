@@ -224,9 +224,10 @@ public class BackgroundGeolocationPlugin extends CordovaPlugin {
     public void onDestroy() {
         Log.d(TAG, "destroying plugin");
         cleanUp();
-
-        if (config.getStopOnTerminate()) {
-            stopBackgroundService();
+        if (config != null) {
+            if (config.getStopOnTerminate()) {
+                stopBackgroundService();
+            }
         }
 
         super.onDestroy();
