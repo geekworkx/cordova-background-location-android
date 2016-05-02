@@ -40,7 +40,7 @@ import com.tenforwardconsulting.cordova.bgloc.data.LocationDAO;
 
 
 public class DistanceFilterLocationProvider extends AbstractLocationProvider implements LocationListener {
-    private static final String TAG = "DistanceFilterLocationProvider";
+    private static final String TAG = "DistanceFilterLocation";
     private static final String STATIONARY_REGION_ACTION        = "com.tenforwardconsulting.cordova.bgloc.STATIONARY_REGION_ACTION";
     private static final String STATIONARY_ALARM_ACTION         = "com.tenforwardconsulting.cordova.bgloc.STATIONARY_ALARM_ACTION";
     private static final String SINGLE_LOCATION_UPDATE_ACTION   = "com.tenforwardconsulting.cordova.bgloc.SINGLE_LOCATION_UPDATE_ACTION";
@@ -55,6 +55,7 @@ public class DistanceFilterLocationProvider extends AbstractLocationProvider imp
     private Boolean isAcquiringStationaryLocation = false;
     private Boolean isAcquiringSpeed = false;
     private Integer locationAcquisitionAttempts = 0;
+    private Boolean disableElasticity = true;
 
     private PowerManager.WakeLock wakeLock;
 
@@ -283,11 +284,13 @@ public class DistanceFilterLocationProvider extends AbstractLocationProvider imp
                 resetStationaryAlarm();
             }
             // Calculate latest distanceFilter, if it changed by 5 m/s, we'll reconfigure our pace.
-            Integer newDistanceFilter = calculateDistanceFilter(location.getSpeed());
-            if (newDistanceFilter != scaledDistanceFilter.intValue()) {
-                Log.i(TAG, "- updated distanceFilter, new: " + newDistanceFilter + ", old: " + scaledDistanceFilter);
-                scaledDistanceFilter = newDistanceFilter;
-                setPace(true);
+            if(!disableElasticity) {
+                Integer newDistanceFilter = calculateDistanceFilter(location.getSpeed());
+                if (newDistanceFilter != scaledDistanceFilter.intValue()) {
+                    Log.i(TAG, "- updated distanceFilter, new: " + newDistanceFilter + ", old: " + scaledDistanceFilter);
+                    scaledDistanceFilter = newDistanceFilter;
+                    setPace(true);
+                }
             }
             if (location.distanceTo(lastLocation) < config.getDistanceFilter()) {
                 return;
